@@ -8,6 +8,7 @@ import base64
 import tempfile
 from PIL import Image
 import googlemaps
+from fpdf import FPDF
 import re
 from firecrawl import FirecrawlApp  # New import for Firecrawl
 
@@ -284,30 +285,43 @@ def search_medication_products(medication_name):
         # Use Firecrawl to search for the medication
         scraped_data = firecrawl_app.search(
             query=search_query,
-            params={
-                "limit": 3  # Limit to top 3 results
-            }
+            limit=3  # Limit to top 3 results
         )
         
         # Process the results
         products = []
-        for result in scraped_data.get('data', [])[:3]:  # Limit to top 3 results
-            product = {
-                'name': f"{medication_name.capitalize()} from {result.get('url', '').split('/')[2]}",
-                'price': 'Check website for price',
-                'url': result.get('url', '#'),
-                'source': result.get('url', '').split('/')[2] if result.get('url') else 'Unknown'
-            }
-            products.append(product)
+        if scraped_data and isinstance(scraped_data, list):
+            for result in scraped_data[:3]:  # Limit to top 3 results
+                url = result.get('url', '')
+                product = {
+                    'name': f"{medication_name.capitalize()} from {url.split('/')[2] if url else 'pharmacy'}",
+                    'price': 'Check website for price',
+                    'url': url if url else f"https://www.google.com/search?q={medication_name}+buy+online",
+                    'source': url.split('/')[2] if url else 'Online Pharmacy'
+                }
+                products.append(product)
         
         return products if products else None
     except Exception as e:
         st.error(f"Error searching for medication: {str(e)}")
         return None
-    
 
 def display_medication_products(medication_name):
     """Display medication products with purchase links"""
+    # First check if this is a prescription medication
+    prescription_meds = ['vancomycin', 'insulin', 'chemotherapy', 'warfarin', 
+                        'morphine', 'oxycodone', 'adderall', 'ritalin']
+    
+    if medication_name.lower() in prescription_meds:
+        st.warning(f"⚠️ {medication_name.capitalize()} is a prescription medication that cannot be purchased online without a doctor's prescription.")
+        st.markdown("""
+        Please consult with a licensed healthcare provider to obtain this medication.
+        You may check availability at:
+        - [Apollo Pharmacy](https://www.apollopharmacy.in)
+        - [Local Hospitals](https://www.google.com/maps/search/hospital+near+me)
+        """)
+        return
+    
     with st.spinner(f"Searching for {medication_name} products..."):
         products = search_medication_products(medication_name)
         
@@ -322,7 +336,37 @@ def display_medication_products(medication_name):
                 🔗 [Buy Now]({product['url']})  
                 """)
         else:
-            st.warning(f"Could not find purchase options for {medication_name}. Please check local pharmacies.")
+            st.warning(f"Could not find direct purchase options for {medication_name}. Here are some alternative options:")
+            st.markdown(f"""
+            - [PharmEasy Search](https://pharmeasy.in/search/all?name={medication_name})
+            - [Netmeds Search](https://www.netmeds.com/catalogsearch/result/{medication_name}/all)
+            - [1mg Search](https://www.1mg.com/search/all?filter=true&name={medication_name})
+            - [Apollo Pharmacy Search](https://www.apollopharmacy.in/search-medicines/{medication_name})
+            - [Google Search](https://www.google.com/search?q={medication_name}+buy+online+india)
+            """)
+    """Display medication products with purchase links"""
+    with st.spinner(f"Searching for {medication_name} products..."):
+        products = search_medication_products(medication_name)
+        
+        if products:
+            st.subheader(f"🛒 Purchase Options for {medication_name.capitalize()}")
+            
+            for i, product in enumerate(products, 1):
+                st.markdown(f"""
+                **{i}. {product['name']}**  
+                💵 Price: {product['price']}  
+                � Source: {product['source']}  
+                🔗 [Buy Now]({product['url']})  
+                """)
+        else:
+            st.warning(f"Could not find purchase options for {medication_name}. Here are some alternative options:")
+            st.markdown(f"""
+            - [PharmEasy Search](https://pharmeasy.in/search/all?name={medication_name})
+            - [Netmeds Search](https://www.netmeds.com/catalogsearch/result/{medication_name}/all)
+            - [1mg Search](https://www.1mg.com/search/all?filter=true&name={medication_name})
+            - [Apollo Pharmacy Search](https://www.apollopharmacy.in/search-medicines/{medication_name})
+            """)
+
 
 def main():
     st.set_page_config(page_title="AI Health Assistant", page_icon="🩺", layout="wide")
@@ -564,5 +608,4 @@ def main():
             """)
 
 if __name__ == "__main__":
-
     main()
