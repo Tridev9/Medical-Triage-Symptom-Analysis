@@ -7,7 +7,7 @@
 An AI-powered health assistant providing instant symptom analysis, medical triage, and emergency assistance with multilingual support.
 
 ## 🌐 Live Demo
-➡️ [Try the live demo here](https://your-demo-link.streamlit.app)
+➡️ [Try the live demo here]([https://your-demo-link.streamlit.app](https://medical-triage-symptom-analysis-ntpqcwzxuvk7fcdslg3o9k.streamlit.app/))
 
 ## 🌟 Features
 
