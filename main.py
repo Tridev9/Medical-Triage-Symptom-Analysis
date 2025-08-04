@@ -8,7 +8,6 @@ import base64
 import tempfile
 from PIL import Image
 import googlemaps
-from fpdf import FPDF
 import re
 from firecrawl import FirecrawlApp  # New import for Firecrawl
 
@@ -565,4 +564,5 @@ def main():
             """)
 
 if __name__ == "__main__":
+
     main()
