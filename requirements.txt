@@ -6,4 +6,5 @@ googlemaps
 folium
 streamlit-folium
 firecrawl-py 
+fpdf2==1.7.6
 requests
