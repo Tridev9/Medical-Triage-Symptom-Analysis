@@ -1,0 +1,9 @@
+streamlit==1.28.0
+google-generativeai==0.3.0
+python-dotenv==1.0.0
+gTTS
+googlemaps
+folium
+streamlit-folium
+firecrawl-py 
+requests
